@@ -1,0 +1,47 @@
+name: MoleculeFoundry
+options:
+  bundleIdPrefix: org.timelabs
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: 398XACWZ7G
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  MoleculeFoundry:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+      - path: Resources/Game
+        type: folder
+      - Resources/Assets.xcassets
+      - Resources/PrivacyInfo.xcprivacy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.timelabs.moleculefoundry
+        INFOPLIST_FILE: Sources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO
+        SUPPORTS_MACCATALYST: NO
+    scheme:
+      gatherCoverageData: false
+      testTargets:
+        - MoleculeFoundryUITests
+  MoleculeFoundryUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - ../../scripts/release/UITests
+    dependencies:
+      - target: MoleculeFoundry
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: org.timelabs.moleculefoundry.uitests
+        TEST_TARGET_NAME: MoleculeFoundry

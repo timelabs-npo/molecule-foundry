@@ -1,0 +1,22 @@
+{
+  "name": "molecule-foundry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "workspaces": [
+    "apps/game",
+    "apps/control"
+  ],
+  "scripts": {
+    "test": "node --import tsx --test packages/engine/tests/*.test.ts",
+    "build:game": "npm run build --workspace apps/game",
+    "build:control": "npm run build --workspace apps/control",
+    "build:ios-web": "npm run build:native --workspace apps/game && node scripts/prepare-ios-web.mjs",
+    "verify": "npm test && npm run build:game && npm run build:ios-web"
+  },
+  "devDependencies": {
+    "tsx": "4.20.6",
+    "@types/node": "24.10.1"
+  }
+}

@@ -1,0 +1,104 @@
+name: iOS validation and TestFlight
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      export_ipa:
+        description: Export a signed IPA after validation
+        type: boolean
+        default: false
+      upload:
+        description: Upload the validated, signed IPA to the registered Molecule Foundry app
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: molecule-ios-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: maxim-lobanov/setup-xcode@1242409711ff5721add51979e9e11e23ebb7e5a4
+        with:
+          xcode-version: '26.3'
+      - name: Install dependencies and run game tests
+        run: npm ci && npm test
+      - name: Build the offline game bundle
+        run: npm run build:ios-web
+      - name: Install project generator
+        run: command -v xcodegen >/dev/null || brew install xcodegen
+      - name: Compile simulator and device targets; launch simulator
+        run: bash scripts/release/validate-ios.sh
+      - name: Preserve native validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: MoleculeFoundry-validation-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            build/release/*.log
+            build/release/*.json
+            build/release/*.png
+            build/release/*.zip
+            build/release/NativeUITests.xcresult
+
+  release:
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (inputs.export_ipa || inputs.upload)
+    runs-on: macos-15
+    timeout-minutes: 45
+    environment: testflight
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: maxim-lobanov/setup-xcode@1242409711ff5721add51979e9e11e23ebb7e5a4
+        with:
+          xcode-version: '26.3'
+      - name: Rebuild the same commit for distribution
+        run: |
+          npm ci
+          npm run build:ios-web
+          command -v xcodegen >/dev/null || brew install xcodegen
+      - name: Sign, verify, export and optionally upload
+        run: bash scripts/release/export-ios.sh
+        env:
+          DEVELOPMENT_TEAM: ${{ vars.DEVELOPMENT_TEAM }}
+          PRODUCT_BUNDLE_IDENTIFIER: ${{ vars.PRODUCT_BUNDLE_IDENTIFIER }}
+          PROVISIONING_PROFILE_NAME: ${{ vars.PROVISIONING_PROFILE_NAME }}
+          APP_STORE_APP_ID: ${{ vars.APP_STORE_APP_ID }}
+          ASC_KEY_ID: ${{ vars.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ vars.ASC_ISSUER_ID }}
+          APPLE_DISTRIBUTION_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
+          APPLE_DISTRIBUTION_P12_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
+          APP_STORE_PROFILE_BASE64: ${{ secrets.APP_STORE_PROFILE_BASE64 }}
+          ASC_PRIVATE_KEY_P8_BASE64: ${{ secrets.ASC_PRIVATE_KEY_P8_BASE64 }}
+          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload }}
+      - name: Preserve signed IPA and release receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: MoleculeFoundry-release-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            build/release/*.json
+            build/release/*.log
+            build/release/export/*.ipa

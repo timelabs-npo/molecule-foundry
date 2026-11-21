@@ -1,0 +1,11 @@
+import { cp, mkdir, rm, access, readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+const source = resolve('apps/game/dist/native');
+const target = resolve('apps/ios/Resources/Game');
+await access(resolve(source, 'native.html'));
+const html = await readFile(resolve(source, 'native.html'), 'utf8');
+if (/src="\//.test(html) || /href="\//.test(html)) throw new Error('Native asset paths must be relative.');
+await rm(target, { recursive: true, force: true });
+await mkdir(target, { recursive: true });
+await cp(source, target, { recursive: true });
+console.log('Bundled offline game assets into iOS Resources/Game.');

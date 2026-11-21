@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {readFileSync} from 'node:fs';
+import {DatabaseSync} from 'node:sqlite';
+import worker,{authorizeMutation,validateConfig,githubOverview} from '../worker/index.js';
+function d1(){const sql=new DatabaseSync(':memory:');sql.exec(readFileSync(new URL('../drizzle/0000_control.sql',import.meta.url),'utf8'));return{sql,prepare(query){return{values:[],bind(...values){this.values=values;return this;},async first(){return sql.prepare(query).get(...this.values)||null},async all(){return {results:sql.prepare(query).all(...this.values)}},run(){const stmt=sql.prepare(query);if(/^\s*SELECT/i.test(query))return{results:stmt.all(...this.values),meta:{changes:0}};const r=stmt.run(...this.values);return{results:[],meta:{changes:Number(r.changes)}}}}},async batch(statements){sql.exec('BEGIN');try{const r=statements.map(s=>s.run());sql.exec('COMMIT');return r}catch(e){sql.exec('ROLLBACK');throw e}}};}
+const origin='https://studio.example';
+const headers={'oai-authenticated-user-id':'user-one','oai-authenticated-user-email':'timelabs.ad@gmail.com',origin,'content-type':'application/json'};
+function post(path,body,key=crypto.randomUUID(),extra={}){return new Request(origin+path,{method:'POST',headers:{...headers,'idempotency-key':key,...extra},body:JSON.stringify(body)});}
+const create={action:'create',title:'Verify a genuine TestFlight installation',detail:'Evidence must identify the version and build.',owner:'arcologies@icloud.com',priority:'high'};
+const config={title:'First contract',notes:'Check first-play uncertainty.',baseRevision:0,config:{unitCostLimit:.3,projectBudget:5000,cohortSize:137,fatigueLimit:8,liverSignalLimit:4}};
+const assets={fetch:async()=>new Response('missing',{status:404})};
+test('writes require signed-in allowlisted identity and same origin',async()=>{
+ for(const extra of [{'oai-authenticated-user-id':''},{'oai-authenticated-user-email':'stranger@example.com'},{origin:'https://evil.example'},{origin:''},{'sec-fetch-site':'cross-site'}]){
+ const response=await worker.fetch(post('/api/tasks',create,crypto.randomUUID(),extra),{DB:d1(),ASSETS:assets});assert.ok([401,403].includes(response.status));}
+ assert.equal(authorizeMutation(post('/api/tasks',create)).email,'timelabs.ad@gmail.com');
+});
+test('task save is durable, idempotent, and atomically audited',async()=>{
+ const db=d1(),key=crypto.randomUUID(),env={DB:db,ASSETS:assets};
+ let r=await worker.fetch(post('/api/tasks',create,key),env);assert.equal(r.status,201);const first=await r.json();assert.equal(first.task.status,'queued');
+ r=await worker.fetch(post('/api/tasks',create,key),env);assert.equal(r.status,200);assert.deepEqual(await r.json(),first);
+ assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM tasks').get().n,1);assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM audit_events').get().n,1);
+ r=await worker.fetch(post('/api/tasks',{...create,title:'A different change'},key),env);assert.equal(r.status,409);
+ r=await worker.fetch(new Request(origin+'/api/tasks',{headers}),env);assert.equal((await r.json()).tasks[0].title,create.title);
+});
+test('stale task versions cannot overwrite another developer or create false audit entries',async()=>{
+ const db=d1(),env={DB:db,ASSETS:assets};const first=await(await worker.fetch(post('/api/tasks',create),env)).json();
+ let r=await worker.fetch(post('/api/tasks',{action:'set_status',id:first.task.id,version:1,status:'active'}),env);assert.equal(r.status,200);assert.equal((await r.json()).task.version,2);
+ r=await worker.fetch(post('/api/tasks',{action:'set_status',id:first.task.id,version:1,status:'done'}),env);assert.equal(r.status,409);
+ assert.equal(db.sql.prepare('SELECT status FROM tasks').get().status,'active');assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM audit_events').get().n,2);
+});
+test('an audit write failure rolls back the task and operation receipt',async()=>{
+ const db=d1();db.sql.exec("CREATE TRIGGER fail_audit BEFORE INSERT ON audit_events BEGIN SELECT RAISE(ABORT,'audit unavailable'); END;");
+ const r=await worker.fetch(post('/api/tasks',create),{DB:db,ASSETS:assets});assert.equal(r.status,503);assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM tasks').get().n,0);assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM mutation_receipts').get().n,0);
+});
+test('configuration saves immutable drafts and rejects stale base revisions',async()=>{
+ const db=d1(),env={DB:db,ASSETS:assets};let r=await worker.fetch(post('/api/config',config),env);assert.equal(r.status,201);let v=(await r.json()).version;assert.equal(v.status,'draft');assert.equal(v.revision,1);
+ r=await worker.fetch(post('/api/config',{...config,title:'Conflict'}),env);assert.equal(r.status,409);
+ r=await worker.fetch(post('/api/config',{...config,baseRevision:1,title:'A revised cohort',config:{...config.config,cohortSize:300}}),env);assert.equal(r.status,201);
+ assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM config_versions').get().n,2);assert.equal(JSON.parse(db.sql.prepare('SELECT config_json FROM config_versions WHERE revision=1').get().config_json).cohortSize,137);
+});
+test('invalid balance values and unrecognized owners fail validation',async()=>{
+ for(const override of [{cohortSize:0},{cohortSize:21.5},{unitCostLimit:-1},{fatigueLimit:101},{projectBudget:Infinity}])assert.throws(()=>validateConfig({...config,config:{...config.config,...override}}));
+ const r=await worker.fetch(post('/api/tasks',{...create,owner:'unconfirmed@example.com'}),{DB:d1(),ASSETS:assets});assert.equal(r.status,400);
+});
+test('private task and audit reads require workspace membership',async()=>{
+ for(const path of ['/api/tasks','/api/config','/api/audit']){
+ const r=await worker.fetch(new Request(origin+path),{DB:d1(),ASSETS:assets});assert.equal(r.status,401);
+ const denied=await worker.fetch(new Request(origin+path,{headers:{...headers,'oai-authenticated-user-email':'outsider@example.com'}}),{DB:d1(),ASSETS:assets});assert.equal(denied.status,403);}
+});
+test('GitHub reads are bounded to the exact repository and failures stay unverified',async()=>{
+ const urls=[];const r=await githubOverview(async(url)=>{urls.push(url);return new Response('{"message":"rate limit"}',{status:403,headers:{'content-type':'application/json'}})});
+ assert.equal(urls.length,5);assert.ok(urls.every(u=>u.startsWith('https://api.github.com/repos/timelabs-npo/molecule-foundry')));assert.equal(r.repo,null);assert.equal(r.workflows.length,0);assert.equal(r.errors.length,5);assert.ok(r.observedAt);
+});
+test('unknown APIs never fall through to a successful app shell',async()=>{
+ let calls=0;const response=await worker.fetch(new Request(origin+'/api/not-real',{headers:{accept:'text/html'}}),{ASSETS:{fetch:async()=>{calls++;return new Response('shell')}}});assert.equal(response.status,404);assert.equal(calls,0);
+});
+test('a competing write between read and commit cannot create a false audit or receipt',async()=>{
+ const db=d1(),env={DB:db,ASSETS:assets};const first=await(await worker.fetch(post('/api/tasks',create),env)).json();
+ const realBatch=db.batch.bind(db);db.batch=async(statements)=>{db.sql.prepare("UPDATE tasks SET version=2,status='review',operation_id='another-operation' WHERE id=?").run(first.task.id);return realBatch(statements)};
+ const r=await worker.fetch(post('/api/tasks',{action:'set_status',id:first.task.id,version:1,status:'done'}),env);assert.equal(r.status,409);
+ assert.equal(db.sql.prepare('SELECT status FROM tasks').get().status,'review');assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM audit_events').get().n,1);assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM mutation_receipts').get().n,1);
+});
