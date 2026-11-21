@@ -5,6 +5,8 @@ const target = resolve('apps/ios/Resources/Game');
 await access(resolve(source, 'native.html'));
 const html = await readFile(resolve(source, 'native.html'), 'utf8');
 if (/src="\//.test(html) || /href="\//.test(html)) throw new Error('Native asset paths must be relative.');
+const javascript = await readFile(resolve(source, 'game.js'), 'utf8');
+if (/\bprocess\.env\b/.test(javascript)) throw new Error('Native IIFE still references Node process.env and will crash in WKWebView. Define process.env.NODE_ENV as production in vite.native.config.ts, then rebuild.');
 await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });

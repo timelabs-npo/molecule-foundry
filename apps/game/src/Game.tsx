@@ -72,7 +72,7 @@ export default function Game({ ScrollComponent = NativeScroll }: { ScrollCompone
   function batch() { command({ type: 'batch' }); setLibraryOpen(false); setInspect(true); }
 
   return <div className="mf-app" aria-label="Molecule Foundry game">
-    <ScrollComponent className="mf-scroll"><main className="mf-main">
+    <ScrollComponent key={`${tab}:${state.phase}`} className="mf-scroll"><main className="mf-main">
       <header className="mf-brand"><span>MOLECULE FOUNDRY</span><span className="mf-version">DEMO · {ENGINE_VERSION}</span></header>
       <div className="mf-contract"><button className="mf-brief-link" aria-label="Read project targets" onClick={() => navigate('notebook')}><b>{String(contract.number).padStart(2, '0')}</b> / {contract.title}</button><span className="mf-caption">{credits(state.budget)} cr</span></div>
       {saveError && <p className="mf-warning">This browser cannot save progress. Keep the game open.</p>}

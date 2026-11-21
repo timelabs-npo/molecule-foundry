@@ -11,9 +11,9 @@
   "scripts": {
     "test": "node --import tsx --test packages/engine/tests/*.test.ts",
     "build:game": "npm run build --workspace apps/game",
-    "build:control": "npm run build --workspace apps/control",
+    "build:control": "npm run build:native --workspace apps/game && node scripts/prepare-control-play.mjs && npm run build --workspace apps/control && node scripts/prepare-control-play.mjs --verify",
     "build:ios-web": "npm run build:native --workspace apps/game && node scripts/prepare-ios-web.mjs",
-    "verify": "npm test && npm run build:game && npm run build:ios-web"
+    "verify": "npm test && npm run build:game && npm run build:ios-web && npm run build:control"
   },
   "devDependencies": {
     "tsx": "4.20.6",
