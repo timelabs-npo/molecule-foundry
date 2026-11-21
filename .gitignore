@@ -11,6 +11,7 @@ dist/
 *.mobileprovision
 *.keychain*
 apps/ios/Resources/Game/
+apps/control/public/play/
 apps/ios/*.xcodeproj/
 apps/ios/build/
 artifacts/
