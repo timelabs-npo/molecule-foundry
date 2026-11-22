@@ -1,0 +1,28 @@
+name: Control plane validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Test control API authentication, transactions, GitHub cache and release evidence
+        run: npm run test --workspace apps/control
+      - name: Build control site and offline game assets
+        run: npm run build:control
+      - name: Verify Sites packaging and routing
+        run: npm run test:sites --workspace apps/control
