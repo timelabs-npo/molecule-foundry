@@ -53,7 +53,7 @@ test('GitHub reads are bounded to the exact repository and failures stay unverif
  const urls=[];const r=await githubOverview(async(url)=>{urls.push(url);return new Response('{"message":"rate limit"}',{status:403,headers:{'content-type':'application/json'}})});
  assert.equal(urls.length,5);assert.ok(urls.every(u=>u.startsWith('https://api.github.com/repos/timelabs-npo/molecule-foundry')));assert.equal(r.repo,null);assert.equal(r.workflows.length,0);assert.equal(r.errors.length,5);assert.ok(r.observedAt);
 });
-test('public GitHub snapshot is shared across isolates without caching authentication or total failures',async()=>{
+test('public GitHub snapshot is reused across isolates and total failures remain uncached',async()=>{
  const stored=new Map(),cache={
   async match(request){return stored.get(request.url)?.clone();},
   async put(request,response){stored.set(request.url,response.clone());}
@@ -72,10 +72,12 @@ test('public GitHub snapshot is shared across isolates without caching authentic
  assert.deepEqual(second,first);
  assert.equal(stored.size,1);
  assert.equal(first.repo.visibility,'public');
- const noCache={async match(){return null},async put(){throw Error('Total GitHub failure must not be cached')}};
+ let failedCacheWrites=0;
+ const noCache={async match(){return null},async put(){failedCacheWrites++;}};
  const failed=await cachedGithubOverview('https://rate-limited.example',async()=>new Response('rate limited',{status:403}),noCache);
  assert.equal(failed.errors.length,5);
  assert.equal(failed.repo,null);
+ assert.equal(failedCacheWrites,0);
 });
 
 test('unknown APIs never fall through to a successful app shell',async()=>{
