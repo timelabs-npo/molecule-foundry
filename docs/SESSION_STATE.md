@@ -6,7 +6,7 @@ Deliver the new pharmacology game through TestFlight, a public MIT repository un
 
 ## Current TestFlight delivery
 
-**Verified at 06:51:01 UTC on 22 November 2026:** Molecule Foundry **0.1.0 (23.1)** is **Testing** in the internal **Molecule Foundry Developers** group. App Store Connect showed two testers and one build, with both testers reported as having installed this exact build. This is Apple-reported installation evidence; independently exercised gameplay on a physical iPhone remains unverified.
+**UI verified at 06:51:01 UTC and independently confirmed through the Apple API at 06:54:39–06:54:51 UTC on 22 November 2026:** Molecule Foundry **0.1.0 (23.1)** is **Testing** in the internal **Molecule Foundry Developers** group. App Store Connect showed two testers and one build, with both testers reported as having installed this exact build. This is Apple-reported installation evidence; independently exercised gameplay on a physical iPhone remains unverified.
 
 | Gate | Verified evidence |
 | --- | --- |
@@ -18,18 +18,18 @@ Deliver the new pharmacology game through TestFlight, a public MIT repository un
 | Apple upload | Accepted at 2026-11-22T06:46:07.422524Z |
 | Apple processing | Build `0bba15f4-a073-4d97-857a-ec921eb8bcf0` reported `VALID` at 2026-11-22T06:47:39Z |
 | Internal distribution | [Molecule Foundry Developers](https://appstoreconnect.apple.com/teams/7ecf5889-417e-4f6d-80cf-c3640155a4cc/apps/6837899703/testflight/groups/5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1), group `5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1`; exact build 0.1.0 (23.1), status `Testing`, 90 days remaining at observation |
-| Tester installation | Both assigned testers reported `Installed 0.1.0 (23.1)` in App Store Connect |
+| Tester installation | UI showed both assigned testers `Installed 0.1.0 (23.1)`; independent API readback confirmed both exact group members `INSTALLED`, group membership of the exact build and internal build state `IN_BETA_TESTING` |
 | What to Test | Saved and verified in Apple UI |
 | Physical gameplay | Not independently exercised on a physical device; do not equate Apple-reported installation with a gameplay acceptance test |
 | External review / Apple Arcade | Neither external beta review nor an Apple Arcade submission is recorded by this internal TestFlight delivery |
 
-The public [release receipt](../apps/control/public/release-evidence.json) records the exact source, Apple build, timestamps and artifact digests. The [delivery issue](https://github.com/timelabs-npo/molecule-foundry/issues/4) holds the session's observed Apple/group evidence. The distributed binary remains tied to the signed source above even when later web/docs commits advance `main`.
+The public [release receipt](../apps/control/public/release-evidence.json) records the exact source, Apple build, timestamps and artifact digests. The [final delivery receipt](https://github.com/timelabs-npo/molecule-foundry/issues/4#issuecomment-7075607432) holds the session's observed Apple/group evidence. The distributed binary remains tied to the signed source above even when later web/docs commits advance `main`.
 
 ### Retained artifact evidence
 
 - Signed-release artifact [14742939886](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742939886): ZIP SHA-256 `123d99ab411245ba290c4d55ee475bb7e7b5603daff5dfdfa9233de969065e95`, 3319679 bytes.
 - Native-validation artifact [14742894466](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742894466): ZIP SHA-256 `7aaad3ed218527548173387d1bbf549736251bb91e33bc4aa4421db16eb7d806`, independently downloaded and hash checked by root.
-- The original machine receipt still says human screenshot review is required. The separate root visual review above records completion without rewriting the original artifact.
+- The original machine receipts retain their pre-distribution fields, including required human screenshot review and `tester_access_verified: false`. Root's later visual review and the independent Apple/group readback establish those subsequent observations separately; the original artifacts remain unchanged.
 - Credential material, private keys and provisioning-profile contents are excluded from public evidence.
 
 ## Delivered surfaces

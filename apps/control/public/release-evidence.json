@@ -9,9 +9,9 @@
   "buildNumber": "23.1",
   "buildId": "0bba15f4-a073-4d97-857a-ec921eb8bcf0",
   "sourceCommit": "d533b0cd8ad195c16838fe4a69732259c9aa8634",
-  "observedAt": "2026-11-22T06:51:01Z",
+  "observedAt": "2026-11-22T06:54:51Z",
   "reason": "TestFlight 0.1.0 (23.1) is Testing in Molecule Foundry Developers. Apple reports both assigned testers have installed this build. Signed export, upload acceptance, and Apple processing are verified. Physical-device gameplay has not been independently exercised.",
-  "evidenceUrl": "https://github.com/timelabs-npo/molecule-foundry/issues/4",
+  "evidenceUrl": "https://github.com/timelabs-npo/molecule-foundry/issues/4#issuecomment-7075607432",
   "workflowUrl": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758",
   "appleGroupUrl": "https://appstoreconnect.apple.com/teams/7ecf5889-417e-4f6d-80cf-c3640155a4cc/apps/6837899703/testflight/groups/5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1",
   "workflow": {
@@ -32,7 +32,8 @@
   },
   "appleProcessing": {
     "state": "VALID",
-    "observedAt": "2026-11-22T06:47:39Z"
+    "observedAt": "2026-11-22T06:47:39Z",
+    "reverifiedAt": "2026-11-22T06:54:39Z"
   },
   "distribution": {
     "kind": "internal",
@@ -42,7 +43,20 @@
     "assignedTesterCount": 2,
     "appleReportedInstalledTesterCount": 2,
     "expiresInDaysAtObservation": 90,
-    "whatToTestSaved": true
+    "whatToTestSaved": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "verification": {
+      "ui": {
+        "observedAt": "2026-11-22T06:51:01Z",
+        "exactInstalledVersion": "0.1.0 (23.1)",
+        "installedTesterCount": 2
+      },
+      "api": {
+        "observedAt": "2026-11-22T06:54:51Z",
+        "groupContainsExactBuild": true,
+        "installedGroupMemberCount": 2
+      }
+    }
   },
   "nativeValidation": {
     "status": "passed",
@@ -62,7 +76,9 @@
       "id": 14742939886,
       "url": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742939886",
       "archiveSha256": "123d99ab411245ba290c4d55ee475bb7e7b5603daff5dfdfa9233de969065e95",
-      "bytes": 3319679
+      "bytes": 3319679,
+      "originalMachineReceiptTesterAccessVerified": false,
+      "laterTesterAccessProof": "https://github.com/timelabs-npo/molecule-foundry/issues/4#issuecomment-7075607432"
     },
     "nativeValidation": {
       "id": 14742894466,
