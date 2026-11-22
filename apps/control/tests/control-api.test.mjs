@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
-import worker,{authorizeMutation,validateConfig,githubOverview,cachedGithubOverview} from '../worker/index.js';
+import worker,{authorizeMutation,validateConfig,githubOverview,cachedGithubOverview,isGithubSnapshotFresh} from '../worker/index.js';
 import {selectLatestNativeValidation,nativeValidationPassed} from '../src/release-status.mjs';
 function d1(){const sql=new DatabaseSync(':memory:');sql.exec(readFileSync(new URL('../drizzle/0000_control.sql',import.meta.url),'utf8'));return{sql,prepare(query){return{values:[],bind(...values){this.values=values;return this;},async first(){return sql.prepare(query).get(...this.values)||null},async all(){return {results:sql.prepare(query).all(...this.values)}},run(){const stmt=sql.prepare(query);if(/^\s*SELECT/i.test(query))return{results:stmt.all(...this.values),meta:{changes:0}};const r=stmt.run(...this.values);return{results:[],meta:{changes:Number(r.changes)}}}}},async batch(statements){sql.exec('BEGIN');try{const r=statements.map(s=>s.run());sql.exec('COMMIT');return r}catch(e){sql.exec('ROLLBACK');throw e}}};}
 const origin='https://studio.example';
@@ -80,6 +80,18 @@ test('public GitHub snapshot is reused across isolates and total failures remain
  assert.equal(failedCacheWrites,0);
 });
 
+test('local cache TTL uses original observation time and short failure retry',()=>{
+ const time=Date.parse('2026-11-22T01:00:00Z');
+ const snapshot={source:'GitHub REST API',repository:'timelabs-npo/molecule-foundry',
+  observedAt:new Date(time).toISOString(),repo:{visibility:'public'},commits:[],branches:[],issues:[],workflows:[],errors:[]};
+ assert.equal(isGithubSnapshotFresh(snapshot,time+20*60*1000-1),true);
+ assert.equal(isGithubSnapshotFresh(snapshot,time+20*60*1000),false);
+ const unavailable={...snapshot,repo:null,errors:[{source:'repo',message:'GitHub rate limit or access restriction'}]};
+ assert.equal(isGithubSnapshotFresh(unavailable,time+60*1000-1),true);
+ assert.equal(isGithubSnapshotFresh(unavailable,time+60*1000),false);
+ assert.equal(isGithubSnapshotFresh({...snapshot,repository:'other/repository'},time),false);
+ assert.equal(isGithubSnapshotFresh({...snapshot,observedAt:'not-a-date'},time),false);
+});
 test('unknown APIs never fall through to a successful app shell',async()=>{
  let calls=0;const response=await worker.fetch(new Request(origin+'/api/not-real',{headers:{accept:'text/html'}}),{ASSETS:{fetch:async()=>{calls++;return new Response('shell')}}});assert.equal(response.status,404);assert.equal(calls,0);
 });
