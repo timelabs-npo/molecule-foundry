@@ -1,0 +1,9 @@
+# Protected mobile-runtime SHA-256 checks hash on-disk bytes.
+# Keep source and SVG assets LF on Windows (including core.autocrlf=true).
+# PNG assets are binary and intentionally remain untouched.
+apps/game/**/*.css text eol=lf
+apps/game/**/*.js text eol=lf
+apps/game/**/*.mjs text eol=lf
+apps/game/**/*.svg text eol=lf
+apps/game/**/*.ts text eol=lf
+apps/game/**/*.tsx text eol=lf
