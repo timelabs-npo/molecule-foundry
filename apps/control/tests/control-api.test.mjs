@@ -69,7 +69,7 @@ test('public GitHub snapshot is reused across isolates and total failures remain
  const first=await cachedGithubOverview(origin,fakeFetch,cache);
  const second=await cachedGithubOverview(origin,()=>{throw Error('Cached public evidence was not reused');},cache);
  assert.equal(calls,5);
- assert.deepEqual(second,first);
+ assert.deepEqual(second,JSON.parse(JSON.stringify(first))); // Cache API returns JSON without undefined fields.
  assert.equal(stored.size,1);
  assert.equal(first.repo.visibility,'public');
  let failedCacheWrites=0;
