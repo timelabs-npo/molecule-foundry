@@ -28,12 +28,21 @@ The playable demo has three contracts, eight process cards, four candidates, sep
 | Dependency remediation | PR #5 native run 44957654364 passed on source 46b956fc3f2bd995322c24bce215a8c7d0686b4f; tested merge 6bfc98650aae1881aa24960d038da6529da5acf4 |
 | Reviewed dependencies merged | Main c351f619aa6682d38fc15b43d9a9d431fbbb7646 has the same source tree as passing PR #5 CI |
 | Current main recheck | LF-only main run 44965074558 passed at 00:15:52 UTC; dependency-merge main run 44965171331 was running at the final source-checkpoint preparation |
-| Control checks | 12 backend tests and 4 Sites package/routing tests passed after evidence-label and even-cohort fixes |
+| Control checks | Initial backend 12/12 and Sites 4/4 passed; PR #7 control API tests expanded to 14/14 with Sites 4/4, passed on merged main in run 44984666394 |
 | Hosted v1 | Deployment succeeded; D1 available; real GitHub observations; playable asset hash matched the built native export |
 | Hosted v2 | Version 2 deployed at 00:18:22 UTC on 22 November; production overview/play returned 200, D1 available, explicit blocked Apple evidence present, game bundle matched local SHA-256 |
 | Production authorization | Service read is not a visitor identity. Private task endpoint returned 401 without identity; no impersonation headers used |
 
 See DESIGN_QA.md and docs/evidence for retained screenshots and receipts. Signing, physical-device installation and TestFlight are separate uncompleted gates. Successful native compilation does not imply an uploaded beta.
+
+## Post-PR #7 source and CI evidence (22 November 2026)
+
+- [PR #7](https://github.com/timelabs-npo/molecule-foundry/pull/7) was technically reviewed with an accurately recorded `COMMENT`, passed its PR-specific checks, and merged into `main` commit **`dcad79cfaba3bb20ef597dc838408aba9548ca40`**. The merge changes only `apps/control/worker/index.js`, `apps/control/tests/control-api.test.mjs`, and `.github/workflows/control-validation.yml`; it does not alter game/native inputs, Apple release, authentication or access controls.
+- The public GitHub observation cache now enforces source-time freshness for 20 minutes and a 60-second retry for an all-unavailable snapshot. This is a *tested source behavior*, not yet a measured production improvement.
+- [PR native run 44979988430](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44979988430) succeeded, including actual simulator launch and 1/1 XCTest. Its validated synthetic merge SHA was `64be1b8b71a55eb1d228b9ee1d261bca32e6b264`, version `0.1.0`, build `16.1`; device compile was **unsigned** (`CODE_SIGNING_ALLOWED=NO`). Original CI artifact 14737557563 was checked against SHA-256 `cefe7b71fae1be7fb26d7ad52e14c6645d8bbee7855acaf170039a3861f31cba`.
+- [Main control run 44984666394](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44984666394) passed with 14/14 control tests and 4/4 Sites tests. [Main native run 44984666400](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44984666400) subsequently **passed** on exact `main` SHA `dcad79cfaba3bb20ef597dc838408aba9548ca40` (validate `success`, release `skipped`). The original [artifact 14738924958](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44984666400/artifacts/14738924958) was downloaded and independently SHA-256 checked: `ccb6d79623b5f77c96669fca70687d4a6317d3a4db0fe4afff607ada5224d02d` (2,707,984 bytes). Original XCTest log: **1/1 passed, 0 failures**; simulator screenshot visually inspected. Version `0.1.0`, build `17.1`. iOS device compilation succeeded with `CODE_SIGNING_ALLOWED=NO` and there was no signed IPA, Apple upload or TestFlight.
+- Hosting remains **Site v2**, published from `3f18f744be8ea65c9ccb0a238bccaa17885eb10b`; **merging PR #7 did not deploy the new cache**. Publish only by the authorized Site project channel while preserving its existing audience. Verify a real public-source cache hit, observation timestamps and truthful rate-limit fallback after deployment. Do not treat unauthenticated Site requests as a two-user collaboration test.
+- Release gates remain distinct: main source, native XCTest, signed archive, Apple upload acceptance, Apple processing, TestFlight testers/physical install. **All gates after unsigned native validation remain unverified.** Apple interactive authentication is paused following the user's aborted credential handoff; do not prompt or attempt another sign-in without explicit resumption.
 
 ## Current Site publication
 
@@ -69,7 +78,7 @@ The separate Molecule Foundry delivery automation is enabled hourly in Europe/Mo
 
 ## Next concrete actions
 
-1. Keep the latest reviewed source and Site version aligned; use branches and technical review for changes.
+1. Preserve verified main-native run 44984666400 and its original SHA-256 artifact. Deploy the reviewed control-cache source to the existing Site only when an authorized deployment channel is available, preserving the audience; verify production freshness and rate-limit behavior separately.
 2. Complete signed-in collaboration acceptance and verify exact GitHub teammate identities.
 3. When the user resumes Apple access, create the bundle/profile/app, export the signed archive, upload and wait for processing.
 4. Associate the processed build with the intended tester group, verify invitations and a real iPhone installation. Record exact Apple build ID and device/OS.
