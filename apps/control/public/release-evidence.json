@@ -1,15 +1,79 @@
 {
-  "status": "blocked",
-  "appRecord": "unverified",
-  "testflight": "not_uploaded",
-  "reason": "The new app's registration is not verified. The session's Apple API registration attempt returned HTTP 403; secure browser sign-in was cancelled at the password step. Native simulator validation has passed, while signing and TestFlight upload remain incomplete.",
-  "observedAt": "2026-11-22T00:11:53Z",
+  "schemaVersion": 1,
+  "status": "available",
+  "appRecord": "verified",
+  "testflight": "available",
+  "appId": "6837899703",
+  "bundleId": "org.timelabs.moleculefoundry",
+  "appVersion": "0.1.0",
+  "buildNumber": "23.1",
+  "buildId": "0bba15f4-a073-4d97-857a-ec921eb8bcf0",
+  "sourceCommit": "d533b0cd8ad195c16838fe4a69732259c9aa8634",
+  "observedAt": "2026-11-22T06:51:01Z",
+  "reason": "TestFlight 0.1.0 (23.1) is Testing in Molecule Foundry Developers. Apple reports both assigned testers have installed this build. Signed export, upload acceptance, and Apple processing are verified. Physical-device gameplay has not been independently exercised.",
   "evidenceUrl": "https://github.com/timelabs-npo/molecule-foundry/issues/4",
+  "workflowUrl": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758",
+  "appleGroupUrl": "https://appstoreconnect.apple.com/teams/7ecf5889-417e-4f6d-80cf-c3640155a4cc/apps/6837899703/testflight/groups/5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1",
+  "workflow": {
+    "runId": 44993976758,
+    "attempt": 1,
+    "status": "success",
+    "completedAt": "2026-11-22T06:47:44Z",
+    "nativeValidationJobId": 137121586494,
+    "releaseJobId": 137123999835
+  },
+  "signing": {
+    "status": "verified",
+    "ipaSha256": "27e8bc0005b240f682c4dccdfeef820961696b7f5bbe263fcd2962e7d4cd5f64"
+  },
+  "upload": {
+    "status": "accepted",
+    "acceptedAt": "2026-11-22T06:46:07.422524Z"
+  },
+  "appleProcessing": {
+    "state": "VALID",
+    "observedAt": "2026-11-22T06:47:39Z"
+  },
+  "distribution": {
+    "kind": "internal",
+    "groupId": "5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1",
+    "groupName": "Molecule Foundry Developers",
+    "buildState": "Testing",
+    "assignedTesterCount": 2,
+    "appleReportedInstalledTesterCount": 2,
+    "expiresInDaysAtObservation": 90,
+    "whatToTestSaved": true
+  },
   "nativeValidation": {
     "status": "passed",
-    "runUrl": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44957654364",
-    "sourceCommit": "46b956fc3f2bd995322c24bce215a8c7d0686b4f",
-    "physicalDeviceTested": false,
-    "signed": false
-  }
+    "runUrl": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758",
+    "sourceCommit": "d533b0cd8ad195c16838fe4a69732259c9aa8634",
+    "simulatorLaunchVerified": true,
+    "simulatorScreenshotReview": "separately confirmed by session owner",
+    "physicalDeviceGameplayVerified": false
+  },
+  "physicalDevice": {
+    "installationStatus": "apple_reported_installed",
+    "installedTesterCount": 2,
+    "gameplayVerified": false
+  },
+  "artifacts": {
+    "signedRelease": {
+      "id": 14742939886,
+      "url": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742939886",
+      "archiveSha256": "123d99ab411245ba290c4d55ee475bb7e7b5603daff5dfdfa9233de969065e95",
+      "bytes": 3319679
+    },
+    "nativeValidation": {
+      "id": 14742894466,
+      "url": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742894466",
+      "archiveSha256": "7aaad3ed218527548173387d1bbf549736251bb91e33bc4aa4421db16eb7d806"
+    }
+  },
+  "teamAccess": {
+    "arcologies": "accepted; existing roles preserved",
+    "timelabsAd": "Developer invitation pending; app-scoped access verified"
+  },
+  "externalBetaReview": "not_requested",
+  "appleArcade": "not_submitted"
 }

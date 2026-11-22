@@ -4,7 +4,7 @@ A React studio with a Cloudflare Worker and a durable Cloudflare D1 workspace.
 
 ## What works
 
-- Fixed-scope live GitHub observations for `timelabs-npo/molecule-foundry`: repository, recent commits, branches, open issues, and workflow runs. Every observation includes its time and individual upstream errors. The Worker caches observations for up to 60 seconds within an isolate.
+- Fixed-scope live GitHub observations for `timelabs-npo/molecule-foundry`: repository, recent commits, branches, open issues, and workflow runs. Every observation includes its time and individual upstream errors. The Worker caches public GitHub observations for up to 20 minutes from their source timestamp, with a 60-second retry for an all-unavailable snapshot. The optional cross-isolate cache contains public GitHub data only.
 - Shared task creation and status changes, including assignee and priority, with version conflict detection.
 - Immutable balance configuration drafts with expected base revision checks. These do not modify a native app or the playable prototype.
 - An attributable audit journal and idempotency receipts written in the same transaction as the underlying mutation.
@@ -49,7 +49,7 @@ Writes require `Content-Type: application/json`, an exact same-origin `Origin`, 
 
 ## Release evidence
 
-By default the panel records the session's verified Apple bundle-registration HTTP 403 blocker and leaves TestFlight unverified. To publish a newer observation, create `public/release-evidence.json` with actual evidence before building. For example, a blocked observation may contain:
+The panel reads the separately reviewed `public/release-evidence.json` receipt. Missing evidence leaves delivery unverified; it does not recreate an old access error. Update the receipt from actual Apple observations before building. For example, a blocked observation may contain:
 
 ```json
 {
@@ -62,7 +62,7 @@ By default the panel records the session's verified Apple bundle-registration HT
 }
 ```
 
-Only record `appRecord: "verified"` after independently observing the new app. Only record `testflight: "available"` with `buildId`, `observedAt`, and traceable evidence after verifying build availability. Never infer Apple distribution from a passing web build. Root merges game web assets into `dist/client/play/`; `/play/` is served from its own index.
+Only record `appRecord: "verified"` after independently observing the new app. Only record `testflight: "available"` with the Apple `buildId`, `buildNumber`, `appVersion`, `sourceCommit`, `observedAt`, and traceable evidence after verifying the processed build is available to the intended tester group. The panel displays the human version/build pair while retaining the Apple resource ID in the receipt. Keep physical-device installation and external beta review as separate observations. Never infer Apple distribution from a passing web build. Root merges game web assets into `dist/client/play/`; `/play/` is served from its own index.
 
 ## Tests
 
