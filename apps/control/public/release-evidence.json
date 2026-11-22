@@ -1,0 +1,15 @@
+{
+  "status": "blocked",
+  "appRecord": "unverified",
+  "testflight": "not_uploaded",
+  "reason": "The new app's registration is not verified. The session's Apple API registration attempt returned HTTP 403; secure browser sign-in was cancelled at the password step. Native simulator validation has passed, while signing and TestFlight upload remain incomplete.",
+  "observedAt": "2026-11-22T00:11:53Z",
+  "evidenceUrl": "https://github.com/timelabs-npo/molecule-foundry/issues/4",
+  "nativeValidation": {
+    "status": "passed",
+    "runUrl": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44957654364",
+    "sourceCommit": "46b956fc3f2bd995322c24bce215a8c7d0686b4f",
+    "physicalDeviceTested": false,
+    "signed": false
+  }
+}
