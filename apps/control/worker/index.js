@@ -4,6 +4,7 @@ const MEMBERS = new Set(["timelabs.ad@gmail.com", "arcologies@icloud.com"]);
 const STATES = new Set(["queued", "active", "review", "done", "blocked"]);
 const PRIORITIES = new Set(["normal", "high", "critical"]);
 let githubCache = null;
+const GITHUB_SNAPSHOT_TTL_MS = 20 * 60 * 1000;
 
 export class ApiError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -149,8 +150,32 @@ export async function githubOverview(fetcher = fetch) {
     workflows:(data.workflows?.workflow_runs||[]).map(w=>({id:w.id,name:w.name,path:w.path,status:w.status,conclusion:w.conclusion,sha:w.head_sha,branch:w.head_branch,createdAt:w.created_at,url:w.html_url})),
   };
 }
+/** Share only public GitHub observations across isolates; never cache visitor identity or D1 state. */
+export async function cachedGithubOverview(origin, fetcher = fetch, cache = globalThis.caches?.default) {
+  const key = new Request(new URL("/__internal/molecule-foundry-github-observations-v1", origin));
+  if (cache) {
+    try {
+      const response = await cache.match(key);
+      if (response?.ok) {
+        const snapshot = await response.json();
+        const age = Date.now() - Date.parse(snapshot?.observedAt);
+        if (snapshot?.repository === REPO && Number.isFinite(age) && age >= 0 && age < GITHUB_SNAPSHOT_TTL_MS) return snapshot;
+      }
+    } catch { /* Cross-isolate cache is optional; fall back to the public API. */ }
+  }
+  const snapshot = await githubOverview(fetcher);
+  const hasEvidence = !!snapshot.repo || snapshot.commits.length > 0 || snapshot.branches.length > 0 || snapshot.issues.length > 0 || snapshot.workflows.length > 0;
+  if (cache && hasEvidence) {
+    try {
+      await cache.put(key, new Response(JSON.stringify(snapshot), {
+        headers: {"content-type":"application/json; charset=utf-8", "cache-control":"public, max-age=1200"}
+      }));
+    } catch { /* Never turn a cache failure into a false successful GitHub observation. */ }
+  }
+  return snapshot;
+}
 async function overview(request,env) {
-  if(!githubCache || Date.now()-githubCache.time>60000) githubCache={time:Date.now(),value:await githubOverview()};
+  if(!githubCache || Date.now()-githubCache.time>GITHUB_SNAPSHOT_TTL_MS) githubCache={time:Date.now(),value:await cachedGithubOverview(new URL(request.url).origin)};
   let storage={available:false,taskCount:0,openTaskCount:0,configCount:0,error:null};
   if(env.DB) {try {const [tasks,configs]=await env.DB.batch([env.DB.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END),0) AS open FROM tasks"),env.DB.prepare("SELECT COUNT(*) AS total FROM config_versions")]);storage={available:true,taskCount:tasks.results?.[0]?.total??0,openTaskCount:tasks.results?.[0]?.open??0,configCount:configs.results?.[0]?.total??0,error:null};}catch {storage.error="Shared database is awaiting a successful migration.";}}
   let release={status:"blocked",appRecord:"unverified",testflight:"not_uploaded",reason:"Apple API credential returned HTTP 403 when registering the new bundle. App registration, signing and upload remain unverified.",observedAt:null};
