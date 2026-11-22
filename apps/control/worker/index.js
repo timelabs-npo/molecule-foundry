@@ -5,6 +5,19 @@ const STATES = new Set(["queued", "active", "review", "done", "blocked"]);
 const PRIORITIES = new Set(["normal", "high", "critical"]);
 let githubCache = null;
 const GITHUB_SNAPSHOT_TTL_MS = 20 * 60 * 1000;
+const GITHUB_FAILURE_RETRY_MS = 60 * 1000;
+
+/** Freshness is anchored to source observation, not to when an isolate reads a cache hit. */
+function hasGithubEvidence(snapshot) {
+  return !!snapshot?.repo || ["commits", "branches", "issues", "workflows"].some(
+    key => Array.isArray(snapshot?.[key]) && snapshot[key].length > 0
+  );
+}
+export function isGithubSnapshotFresh(snapshot, now = Date.now()) {
+  const age = now - Date.parse(snapshot?.observedAt);
+  const ttl = hasGithubEvidence(snapshot) ? GITHUB_SNAPSHOT_TTL_MS : GITHUB_FAILURE_RETRY_MS;
+  return snapshot?.repository === REPO && Number.isFinite(age) && age >= 0 && age < ttl;
+}
 
 export class ApiError extends Error {
   constructor(status, message) { super(message); this.status = status; }
@@ -158,13 +171,12 @@ export async function cachedGithubOverview(origin, fetcher = fetch, cache = glob
       const response = await cache.match(key);
       if (response?.ok) {
         const snapshot = await response.json();
-        const age = Date.now() - Date.parse(snapshot?.observedAt);
-        if (snapshot?.repository === REPO && Number.isFinite(age) && age >= 0 && age < GITHUB_SNAPSHOT_TTL_MS) return snapshot;
+        if (isGithubSnapshotFresh(snapshot)) return snapshot;
       }
     } catch { /* Cross-isolate cache is optional; fall back to the public API. */ }
   }
   const snapshot = await githubOverview(fetcher);
-  const hasEvidence = !!snapshot.repo || snapshot.commits.length > 0 || snapshot.branches.length > 0 || snapshot.issues.length > 0 || snapshot.workflows.length > 0;
+  const hasEvidence = hasGithubEvidence(snapshot);
   if (cache && hasEvidence) {
     try {
       await cache.put(key, new Response(JSON.stringify(snapshot), {
@@ -175,7 +187,7 @@ export async function cachedGithubOverview(origin, fetcher = fetch, cache = glob
   return snapshot;
 }
 async function overview(request,env) {
-  if(!githubCache || Date.now()-githubCache.time>GITHUB_SNAPSHOT_TTL_MS) githubCache={time:Date.now(),value:await cachedGithubOverview(new URL(request.url).origin)};
+  if(!githubCache || !isGithubSnapshotFresh(githubCache.value)) githubCache={value:await cachedGithubOverview(new URL(request.url).origin)};
   let storage={available:false,taskCount:0,openTaskCount:0,configCount:0,error:null};
   if(env.DB) {try {const [tasks,configs]=await env.DB.batch([env.DB.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(CASE WHEN status != 'done' THEN 1 ELSE 0 END),0) AS open FROM tasks"),env.DB.prepare("SELECT COUNT(*) AS total FROM config_versions")]);storage={available:true,taskCount:tasks.results?.[0]?.total??0,openTaskCount:tasks.results?.[0]?.open??0,configCount:configs.results?.[0]?.total??0,error:null};}catch {storage.error="Shared database is awaiting a successful migration.";}}
   let release={status:"blocked",appRecord:"unverified",testflight:"not_uploaded",reason:"Apple API credential returned HTTP 403 when registering the new bundle. App registration, signing and upload remain unverified.",observedAt:null};
