@@ -4,6 +4,34 @@
 
 Deliver the new pharmacology game through TestFlight, a public MIT repository under timelabs-npo, and a shared developer control panel. Work only on Molecule Foundry. Rhea RF Spanner and WORLD.EXE are separate projects.
 
+## Current TestFlight delivery
+
+**UI verified at 06:51:01 UTC and independently confirmed through the Apple API at 06:54:39–06:54:51 UTC on 22 November 2026:** Molecule Foundry **0.1.0 (23.1)** is **Testing** in the internal **Molecule Foundry Developers** group. App Store Connect showed two testers and one build, with both testers reported as having installed this exact build. This is Apple-reported installation evidence; independently exercised gameplay on a physical iPhone remains unverified.
+
+| Gate | Verified evidence |
+| --- | --- |
+| New Apple app | Molecule Foundry, app ID `6837899703`, bundle `org.timelabs.moleculefoundry`, team `398XACWZ7G` |
+| Signed release source | `d533b0cd8ad195c16838fe4a69732259c9aa8634`; includes reviewed PR #9 iPad orientation remediation |
+| Release workflow | [Run 44993976758, attempt 1](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758) succeeded at 2026-11-22T06:47:44Z; native job `137121586494` and release job `137123999835` passed |
+| Native validation | Simulator launch and game/Notebook UI gate passed; root separately reviewed the populated `simulator-launch.png` screenshot |
+| Signed export | Signature verified; IPA SHA-256 `27e8bc0005b240f682c4dccdfeef820961696b7f5bbe263fcd2962e7d4cd5f64` |
+| Apple upload | Accepted at 2026-11-22T06:46:07.422524Z |
+| Apple processing | Build `0bba15f4-a073-4d97-857a-ec921eb8bcf0` reported `VALID` at 2026-11-22T06:47:39Z |
+| Internal distribution | [Molecule Foundry Developers](https://appstoreconnect.apple.com/teams/7ecf5889-417e-4f6d-80cf-c3640155a4cc/apps/6837899703/testflight/groups/5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1), group `5a93cfb4-bd7c-4c0c-acbd-ade02816d8c1`; exact build 0.1.0 (23.1), status `Testing`, 90 days remaining at observation |
+| Tester installation | UI showed both assigned testers `Installed 0.1.0 (23.1)`; independent API readback confirmed both exact group members `INSTALLED`, group membership of the exact build and internal build state `IN_BETA_TESTING` |
+| What to Test | Saved and verified in Apple UI |
+| Physical gameplay | Not independently exercised on a physical device; do not equate Apple-reported installation with a gameplay acceptance test |
+| External review / Apple Arcade | Neither external beta review nor an Apple Arcade submission is recorded by this internal TestFlight delivery |
+
+The public [release receipt](../apps/control/public/release-evidence.json) records the exact source, Apple build, timestamps and artifact digests. The [final delivery receipt](https://github.com/timelabs-npo/molecule-foundry/issues/4#issuecomment-7075607432) holds the session's observed Apple/group evidence. The distributed binary remains tied to the signed source above even when later web/docs commits advance `main`.
+
+### Retained artifact evidence
+
+- Signed-release artifact [14742939886](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742939886): ZIP SHA-256 `123d99ab411245ba290c4d55ee475bb7e7b5603daff5dfdfa9233de969065e95`, 3319679 bytes.
+- Native-validation artifact [14742894466](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44993976758/artifacts/14742894466): ZIP SHA-256 `7aaad3ed218527548173387d1bbf549736251bb91e33bc4aa4421db16eb7d806`, independently downloaded and hash checked by root.
+- The original machine receipts retain their pre-distribution fields, including required human screenshot review and `tester_access_verified: false`. Root's later visual review and the independent Apple/group readback establish those subsequent observations separately; the original artifacts remain unchanged.
+- Credential material, private keys and provisioning-profile contents are excluded from public evidence.
+
 ## Delivered surfaces
 
 - Repository: https://github.com/timelabs-npo/molecule-foundry — public, MIT, main.
@@ -14,7 +42,49 @@ Deliver the new pharmacology game through TestFlight, a public MIT repository un
 
 The playable demo has three contracts, eight process cards, four candidates, separate unit-cost and research-budget constraints, controlled simulated cohorts, confidence intervals, cumulative route-specific evidence, release consequences, upgrades and validated local saves. Clinical effects are authored fiction. Structures and transformation abstractions are described in SCIENCE_MODEL.md.
 
-## Verification and provenance
+## Site publication checkpoint
+
+The final web/docs candidate updates the panel from the historical Apple blocker to the verified TestFlight receipt and includes the reviewed PR #7 public-source cache fix. At this source checkpoint, the last verified production publication is still **Site v2**, source `3f18f744be8ea65c9ccb0a238bccaa17885eb10b`, deployment `appgdep_6b0234c3a5f481918ec3fc4e71acc076`. A merged GitHub commit is not a Site deployment; root owns final preview, save/deploy and production readback for the prepared candidate.
+
+Fresh native Sites readback confirmed the existing project `appgprj_6b01e9c6674c81918fb0a35a848478be` has **public audience revision 4**. Preserve its current owner and all existing grants, including arcologies and altologies. Public viewing does not grant mutation rights: the application allowlist remains the two requested developer identities.
+
+At the earlier v2 observation, D1 was available, `/api/tasks` returned 401 without visitor identity, and the hosted game bundle matched its build manifest. Final production readback must separately verify the new release receipt, source-time cache behavior, playable assets, and private API access. A signed-in write and second-developer readback remain unverified.
+
+## Apple access remediation completed
+
+The user explicitly resumed Apple authentication. The new bundle, app record and app-specific App Store provisioning profile were created and verified; protected `testflight` environment configuration was completed without credential disclosure. Its main-only branch rule and owner review gate were preserved. The former HTTP 403 registration error and cancelled login are historical resolved blockers, not the current delivery state.
+
+The signed release was dispatched from the reviewed source and passed the protected environment gate. No other app's profile or bundle was reused.
+
+## Team and collaboration
+
+| Identity | Current verified access |
+| --- | --- |
+| timelabs.ad | Google brief owner; Site owner/application developer; new Apple `DEVELOPER` invitation is pending acceptance, with visible apps verified as only Molecule Foundry and provisioning access disabled |
+| arcologies | Google brief writer; Site/application developer; accepted Apple access with existing broader roles preserved; internal TestFlight group membership and Apple-reported installation verified |
+| Additional Site viewer | altologies grant preserved; viewing does not add application write permissions |
+
+The expired timelabs.ad Admin invitation was replaced only after fresh inspection. New app-scoped invitation evidence was verified at 06:35:20 UTC; expiration is 25 November 2026 at 06:34:44 UTC. The API omitted `allAppsVisible`; restricted scope is supported by the exact visible-app relationship and UI selection, not by an invented Boolean value. Acceptance is still pending.
+
+GitHub's connected owner is serg-alexv. Exact GitHub login mappings for the two requested email identities remain unverified; do not infer them from similar names. Organization default repository permission was observed as admin, so use repository-only outside-collaborator write access once identities are established, rather than widening unrelated repository access.
+
+The panel implements shared tasks, immutable configuration drafts, optimistic version checks, idempotency receipts and an attributable transactional journal. Saving a draft does not modify a shipped app. GitHub observations use fixed public endpoints; upstream failures remain explicit. There is no enrolled agent runner.
+
+A signed-in production task creation, configuration save and second-developer readback remain acceptance tasks. Normal ChatGPT sign-in provides visitor identity. Service reads and fabricated identity headers are not substitutes for that test.
+
+## Continuous work
+
+The separate Molecule Foundry delivery automation is enabled hourly in Europe/Moscow. During this primary delivery session it is temporarily restricted to read-only monitoring until 09:00 UTC on 22 November 2026 or an explicit primary completion record. Preserve the single release owner and avoid duplicate source updates, dispatches or Apple mutations. Scheduled work is intermittent execution, not an always-running process.
+
+## Next concrete actions
+
+1. Publish this reviewed control-panel candidate through the existing Site, preserving public audience revision 4 and all grants; record its exact saved version, source and deployment receipt after production verification.
+2. Exercise the installed build on a physical iPhone: complete a contract, inspect the controlled report/Notebook, release, purchase an upgrade, background/relaunch and restore the save.
+3. Have timelabs.ad accept the scoped Apple Developer invitation; then verify accepted access and add that accepted identity to the intended tester group.
+4. Complete signed-in two-developer collaboration acceptance and verify exact GitHub teammate identities.
+5. Perform the uncoached first-player, accessibility, chemistry/statistics and performance reviews in AWARD_ROADMAP.md. Treat external beta distribution and any Apple Arcade proposal as separate subsequent milestones.
+
+## Historical validation and provenance
 
 | Gate | Observed evidence |
 | --- | --- |
@@ -33,55 +103,16 @@ The playable demo has three contracts, eight process cards, four candidates, sep
 | Hosted v2 | Version 2 deployed at 00:18:22 UTC on 22 November; production overview/play returned 200, D1 available, explicit blocked Apple evidence present, game bundle matched local SHA-256 |
 | Production authorization | Service read is not a visitor identity. Private task endpoint returned 401 without identity; no impersonation headers used |
 
-See DESIGN_QA.md and docs/evidence for retained screenshots and receipts. Signing, physical-device installation and TestFlight are separate uncompleted gates. Successful native compilation does not imply an uploaded beta.
+See DESIGN_QA.md and docs/evidence for retained screenshots and earlier receipts. These observations predate the signed release above; an unsigned native compile alone did not establish Apple distribution.
 
-## Post-PR #7 source and CI evidence (22 November 2026)
+## Historical post-PR #7 source and CI evidence
 
 - [PR #7](https://github.com/timelabs-npo/molecule-foundry/pull/7) was technically reviewed with an accurately recorded `COMMENT`, passed its PR-specific checks, and merged into `main` commit **`dcad79cfaba3bb20ef597dc838408aba9548ca40`**. The merge changes only `apps/control/worker/index.js`, `apps/control/tests/control-api.test.mjs`, and `.github/workflows/control-validation.yml`; it does not alter game/native inputs, Apple release, authentication or access controls.
 - The public GitHub observation cache now enforces source-time freshness for 20 minutes and a 60-second retry for an all-unavailable snapshot. This is a *tested source behavior*, not yet a measured production improvement.
 - [PR native run 44979988430](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44979988430) succeeded, including actual simulator launch and 1/1 XCTest. Its validated synthetic merge SHA was `64be1b8b71a55eb1d228b9ee1d261bca32e6b264`, version `0.1.0`, build `16.1`; device compile was **unsigned** (`CODE_SIGNING_ALLOWED=NO`). Original CI artifact 14737557563 was checked against SHA-256 `cefe7b71fae1be7fb26d7ad52e14c6645d8bbee7855acaf170039a3861f31cba`.
 - [Main control run 44984666394](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44984666394) passed with 14/14 control tests and 4/4 Sites tests. [Main native run 44984666400](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44984666400) subsequently **passed** on exact `main` SHA `dcad79cfaba3bb20ef597dc838408aba9548ca40` (validate `success`, release `skipped`). The original [artifact 14738924958](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44984666400/artifacts/14738924958) was downloaded and independently SHA-256 checked: `ccb6d79623b5f77c96669fca70687d4a6317d3a4db0fe4afff607ada5224d02d` (2,707,984 bytes). Original XCTest log: **1/1 passed, 0 failures**; simulator screenshot visually inspected. Version `0.1.0`, build `17.1`. iOS device compilation succeeded with `CODE_SIGNING_ALLOWED=NO` and there was no signed IPA, Apple upload or TestFlight.
-- Hosting remains **Site v2**, published from `3f18f744be8ea65c9ccb0a238bccaa17885eb10b`; **merging PR #7 did not deploy the new cache**. Publish only by the authorized Site project channel while preserving its existing audience. Verify a real public-source cache hit, observation timestamps and truthful rate-limit fallback after deployment. Do not treat unauthenticated Site requests as a two-user collaboration test.
-- Release gates remain distinct: main source, native XCTest, signed archive, Apple upload acceptance, Apple processing, TestFlight testers/physical install. **All gates after unsigned native validation remain unverified.** Apple interactive authentication is paused following the user's aborted credential handoff; do not prompt or attempt another sign-in without explicit resumption.
+- At this earlier checkpoint, hosting was **Site v2**, published from `3f18f744be8ea65c9ccb0a238bccaa17885eb10b`; merging PR #7 did not deploy the cache. The final release-publication candidate includes the reviewed cache source. Production observations and signed-in collaboration remain separate checks.
+- At the earlier checkpoint, all gates after unsigned native validation were unverified and Apple authentication was paused after a cancelled handoff. The user explicitly resumed Apple access; the current verified release above supersedes those blockers.
 
-## Current Site publication
-
-Version 2 uses Site source commit `3f18f744be8ea65c9ccb0a238bccaa17885eb10b` and deployment `appgdep_6b0234c3a5f481918ec3fc4e71acc076`. The same workspace and `/play/` URLs remain live. The existing custom audience was preserved.
-
-At 00:18:42 UTC, a supported service read verified available D1 storage with zero task/config rows and the new explicit Apple-blocked release receipt. `/api/tasks` returned 401 without visitor identity. `/play/game.js` was 248007 bytes with SHA-256 `24fa6a0e03d438b001d70bd13bbf3b3225d6acedc36289320a86f554f8d2fcdc`, matching the locally built export and deployed manifest. All five public GitHub source requests were rate-limited at this observation and correctly reported unavailable; do not claim their cards are live when the source is unavailable. A signed-in shared write and second-user readback are still unverified.
-
-## Apple blocker
-
-New identity: `org.timelabs.moleculefoundry`, version `0.1.0`, team `398XACWZ7G`.
-
-The existing distribution certificate was verified as valid. The new repository's protected `testflight` environment and existing authorized signing/API credentials were configured without disclosure. The environment is main-only and has an owner review gate.
-
-The existing API key returned HTTP 403 FORBIDDEN_ERROR while registering the new Bundle ID. A new bundle, app-specific provisioning profile and App Store Connect app record have not been verified. No build was uploaded. Do not repeat the unchanged denied API request or reuse another app's profile.
-
-Secure Apple browser sign-in reached the password step and was cancelled. A fresh browser check on 22 November still showed sign-in. Do not reopen the cancelled credential request unless the user asks to resume Apple authentication. Completion requires authorized registration access, the new app record/profile, APP_STORE_APP_ID and the matching profile secret, then protected release at a tested source revision.
-
-arcologies@icloud.com already exists in App Store Connect with broader accepted roles; preserve those roles. Requested Developer/new-app access has not been verified. The old timelabs.ad@gmail.com Admin invitation is expired; new app-scoped developer access should be configured after app creation.
-
-## Team and collaboration
-
-Google: timelabs.ad@gmail.com owns the brief; arcologies@icloud.com is a writer. Site access was granted to both requested addresses, and both are in the application's developer allowlist. Preserve any additional Site viewers already present; visitor access alone does not grant application mutation rights.
-
-GitHub's connected owner is serg-alexv. Exact GitHub login mappings for the two requested email identities remain unverified. Do not infer them from similar names. Organization default repository permission was observed as admin, so use repository-only outside-collaborator write access once identities are established, rather than widening unrelated repository access.
-
-The panel implements shared tasks, immutable configuration drafts, optimistic version checks, idempotency receipts and an attributable transactional journal. Saving a draft does not modify a shipped app. GitHub is read through fixed public endpoints; rate-limited sources are reported unavailable. There is no enrolled agent runner in the panel.
-
-A signed-in production task creation, configuration save and readback by the second developer remain to be verified. Both owner and teammate can use normal ChatGPT sign-in. Do not replace this acceptance test with service-authenticated calls that fabricate user headers.
-
-## Continuous work
-
-The separate Molecule Foundry delivery automation is enabled hourly in Europe/Moscow. Recorded runs during the initial session produced and tested the LF-policy and dependency-remediation PRs. Scheduled work is intermittent execution, not an always-running process. Read fresh repository state before acting; do not duplicate open work or repeat unchanged access requests. Notify on material changes, not empty status checks.
-
-## Next concrete actions
-
-1. Preserve verified main-native run 44984666400 and its original SHA-256 artifact. Deploy the reviewed control-cache source to the existing Site only when an authorized deployment channel is available, preserving the audience; verify production freshness and rate-limit behavior separately.
-2. Complete signed-in collaboration acceptance and verify exact GitHub teammate identities.
-3. When the user resumes Apple access, create the bundle/profile/app, export the signed archive, upload and wait for processing.
-4. Associate the processed build with the intended tester group, verify invitations and a real iPhone installation. Record exact Apple build ID and device/OS.
-5. Perform the uncoached first-player, accessibility, chemistry/statistics and performance reviews in AWARD_ROADMAP.md.
 
 Credentials must never appear in this checkpoint, screenshots, game source, shared document, or automation prompt.
