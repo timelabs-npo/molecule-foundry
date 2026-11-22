@@ -3,12 +3,13 @@ import test from 'node:test';
 import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
 import worker,{authorizeMutation,validateConfig,githubOverview} from '../worker/index.js';
+import {selectLatestNativeValidation,nativeValidationPassed} from '../src/release-status.mjs';
 function d1(){const sql=new DatabaseSync(':memory:');sql.exec(readFileSync(new URL('../drizzle/0000_control.sql',import.meta.url),'utf8'));return{sql,prepare(query){return{values:[],bind(...values){this.values=values;return this;},async first(){return sql.prepare(query).get(...this.values)||null},async all(){return {results:sql.prepare(query).all(...this.values)}},run(){const stmt=sql.prepare(query);if(/^\s*SELECT/i.test(query))return{results:stmt.all(...this.values),meta:{changes:0}};const r=stmt.run(...this.values);return{results:[],meta:{changes:Number(r.changes)}}}}},async batch(statements){sql.exec('BEGIN');try{const r=statements.map(s=>s.run());sql.exec('COMMIT');return r}catch(e){sql.exec('ROLLBACK');throw e}}};}
 const origin='https://studio.example';
 const headers={'oai-authenticated-user-id':'user-one','oai-authenticated-user-email':'timelabs.ad@gmail.com',origin,'content-type':'application/json'};
 function post(path,body,key=crypto.randomUUID(),extra={}){return new Request(origin+path,{method:'POST',headers:{...headers,'idempotency-key':key,...extra},body:JSON.stringify(body)});}
 const create={action:'create',title:'Verify a genuine TestFlight installation',detail:'Evidence must identify the version and build.',owner:'arcologies@icloud.com',priority:'high'};
-const config={title:'First contract',notes:'Check first-play uncertainty.',baseRevision:0,config:{unitCostLimit:.3,projectBudget:5000,cohortSize:137,fatigueLimit:8,liverSignalLimit:4}};
+const config={title:'First contract',notes:'Check first-play uncertainty.',baseRevision:0,config:{unitCostLimit:.3,projectBudget:5600,cohortSize:120,fatigueLimit:18,liverSignalLimit:11}};
 const assets={fetch:async()=>new Response('missing',{status:404})};
 test('writes require signed-in allowlisted identity and same origin',async()=>{
  for(const extra of [{'oai-authenticated-user-id':''},{'oai-authenticated-user-email':'stranger@example.com'},{origin:'https://evil.example'},{origin:''},{'sec-fetch-site':'cross-site'}]){
@@ -37,7 +38,7 @@ test('configuration saves immutable drafts and rejects stale base revisions',asy
  const db=d1(),env={DB:db,ASSETS:assets};let r=await worker.fetch(post('/api/config',config),env);assert.equal(r.status,201);let v=(await r.json()).version;assert.equal(v.status,'draft');assert.equal(v.revision,1);
  r=await worker.fetch(post('/api/config',{...config,title:'Conflict'}),env);assert.equal(r.status,409);
  r=await worker.fetch(post('/api/config',{...config,baseRevision:1,title:'A revised cohort',config:{...config.config,cohortSize:300}}),env);assert.equal(r.status,201);
- assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM config_versions').get().n,2);assert.equal(JSON.parse(db.sql.prepare('SELECT config_json FROM config_versions WHERE revision=1').get().config_json).cohortSize,137);
+ assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM config_versions').get().n,2);assert.equal(JSON.parse(db.sql.prepare('SELECT config_json FROM config_versions WHERE revision=1').get().config_json).cohortSize,120);
 });
 test('invalid balance values and unrecognized owners fail validation',async()=>{
  for(const override of [{cohortSize:0},{cohortSize:21.5},{unitCostLimit:-1},{fatigueLimit:101},{projectBudget:Infinity}])assert.throws(()=>validateConfig({...config,config:{...config.config,...override}}));
@@ -60,4 +61,19 @@ test('a competing write between read and commit cannot create a false audit or r
  const realBatch=db.batch.bind(db);db.batch=async(statements)=>{db.sql.prepare("UPDATE tasks SET version=2,status='review',operation_id='another-operation' WHERE id=?").run(first.task.id);return realBatch(statements)};
  const r=await worker.fetch(post('/api/tasks',{action:'set_status',id:first.task.id,version:1,status:'done'}),env);assert.equal(r.status,409);
  assert.equal(db.sql.prepare('SELECT status FROM tasks').get().status,'review');assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM audit_events').get().n,1);assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM mutation_receipts').get().n,1);
+});
+test('odd trial cohorts are rejected without saving an unbalanced draft or audit event',async()=>{
+ const db=d1(),r=await worker.fetch(post('/api/config',{...config,config:{...config.config,cohortSize:137}}),{DB:db,ASSETS:assets});
+ assert.equal(r.status,400);assert.match((await r.json()).error,/even.*equal sizes/);
+ assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM config_versions').get().n,0);
+ assert.equal(db.sql.prepare('SELECT COUNT(*) AS n FROM audit_events').get().n,0);
+});
+test('flight readiness selects native workflow evidence and preserves its actual branch and commit',()=>{
+ const runs=[
+  {id:3,name:'CodeQL',path:'.github/workflows/codeql.yml',status:'completed',conclusion:'success',branch:'main',sha:'main-sha',createdAt:'2026-11-21T22:00:00Z'},
+  {id:2,name:'iOS validation and TestFlight',path:'.github/workflows/ios-testflight.yml',status:'in_progress',conclusion:null,branch:'fix/native-runtime-play',sha:'pr-sha',createdAt:'2026-11-21T21:30:00Z'},
+  {id:1,name:'iOS validation and TestFlight',path:'.github/workflows/ios-testflight.yml',status:'completed',conclusion:'success',branch:'main',sha:'old-sha',createdAt:'2026-11-21T20:00:00Z'},
+ ];
+ const chosen=selectLatestNativeValidation(runs);assert.equal(chosen.id,2);assert.equal(chosen.branch,'fix/native-runtime-play');assert.equal(chosen.sha,'pr-sha');assert.equal(nativeValidationPassed(chosen),false);
+ assert.equal(selectLatestNativeValidation([runs[0]]),null);
 });

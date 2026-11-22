@@ -6,7 +6,7 @@ A chemistry-inspired iPhone puzzle game about making a molecule, learning from u
 
 ## Playable foundation
 
-The first demo contains three research contracts, eight transformation/process cards, four supported candidate structures, animated native haptic feedback, local saves, and persistent laboratory upgrades. The complete loop is contract → production route → test batch → controlled clinical simulation → reformulation or release → funding and consequences.
+The first demo contains three research contracts, eight transformation/process cards, four supported candidate structures, native haptic feedback, local saves, and persistent laboratory upgrades. The complete loop is contract → production route → test batch → controlled clinical simulation → reformulation or release → funding and consequences.
 
 The molecule view renders curated atom/bond topology. Clinical effects and prices are explicitly fictional game values. This is not an arbitrary chemistry predictor or a medical/manufacturing tool. See [the model and sources](docs/SCIENCE_MODEL.md).
 
@@ -20,7 +20,9 @@ The molecule view renders curated atom/bond topology. Clinical effects and price
 | `apps/control` | Developer console: live GitHub evidence, shared D1 tasks, versioned balance drafts, audit journal |
 | `.github/workflows/ios-testflight.yml` | Simulator/device compilation, native UI gate, protected signed release |
 
-The development brief is a shared [Google document](https://docs.google.com/document/d/1Jx7aEoU3TACKicCIo9mYfSomvmHpxe8fLPOMa970okE/edit).
+Open the [developer workspace](https://molecule-foundry-control.hx31337.chatgpt.site) or its [playable demo](https://molecule-foundry-control.hx31337.chatgpt.site/play/). Access uses the Site's team allowlist and ChatGPT sign-in. The development brief is a shared [Google document](https://docs.google.com/document/d/1Jx7aEoU3TACKicCIo9mYfSomvmHpxe8fLPOMa970okE/edit).
+
+The native simulator gate has passed compilation, launch, the rendered game heading/action, and Notebook navigation. [Validation run](https://github.com/timelabs-npo/molecule-foundry/actions/runs/44940427388) · [Workshop capture](docs/evidence/ios-workshop.png) · [Design and interaction QA](docs/DESIGN_QA.md). These are simulator results; physical-device and TestFlight verification remain open.
 
 ## Development
 

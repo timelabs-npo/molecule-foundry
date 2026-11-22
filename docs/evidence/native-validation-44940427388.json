@@ -1,0 +1,13 @@
+{
+  "commit": "8113b13c039356ab405859d883f55b63940273e3",
+  "build": "3.1",
+  "observed_utc": "2026-11-21T19:27:51.774940+00:00",
+  "simulator_compiled": true,
+  "unsigned_device_compiled": true,
+  "simulator_launched": true,
+  "offline_game_ui_and_notebook_verified": true,
+  "physical_device_tested": false,
+  "testflight_uploaded": false,
+  "screenshot": "simulator-launch.png",
+  "screenshot_review": "requires human or visual inspection"
+}

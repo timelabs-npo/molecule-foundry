@@ -1,0 +1,35 @@
+{
+  "repository": "timelabs-npo/molecule-foundry",
+  "run_url": "https://github.com/timelabs-npo/molecule-foundry/actions/runs/44940427388",
+  "run_id": 44940427388,
+  "validation_job_id": 136956185154,
+  "conclusion": "success",
+  "source_pr_head": "7410fc5aac1082ac85748b1edfbb3c3f5af3a8ea",
+  "tested_merge_candidate": "8113b13c039356ab405859d883f55b63940273e3",
+  "merged_main_commit": "224350a10e41ee2c2aaf9397e7db3d73666b602c",
+  "identical_source_tree": "6e529bd0b00588f440a70ab7566cda50b61b733d",
+  "artifact_id": 14721323159,
+  "artifact_name": "MoleculeFoundry-validation-8113b13c039356ab405859d883f55b63940273e3",
+  "artifact_sha256": "339ae5a7d861203ba3ce6c688f4c22e63b054151af743f664fb9085bb451bc22",
+  "artifact_bytes": 2528596,
+  "artifact_expires_utc": "2026-12-05T19:27:53Z",
+  "visual_inspection": "Both recovered XCTest PNGs show rendered game content with readable typography, native safe areas, bottom tabs, and working Workshop to Notebook navigation.",
+  "screenshots": [
+    {
+      "path": "image-001.png",
+      "screen": "workshop",
+      "width": 1206,
+      "height": 2622,
+      "sha256": "6dddc99d516b81b3625b29156eee44829fc6bb39c0a7053fc9e913fb059f2683"
+    },
+    {
+      "path": "image-000.png",
+      "screen": "notebook",
+      "width": 1206,
+      "height": 2622,
+      "sha256": "7804621eaa34985524bc69afb22e67f91957d1e5bfd85e77d662f78c9ce5ec3b"
+    }
+  ],
+  "physical_device_tested": false,
+  "testflight_uploaded": false
+}

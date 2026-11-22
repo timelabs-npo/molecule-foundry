@@ -48,6 +48,7 @@ export function validateConfig(body) {
     const value = config[key];
     if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) throw new ApiError(400, `${key} must be between ${min} and ${max}.`);
     if (["projectBudget", "cohortSize"].includes(key) && !Number.isInteger(value)) throw new ApiError(400, `${key} must be a whole number.`);
+    if (key === "cohortSize" && value % 2 !== 0) throw new ApiError(400, "Cohort size must be even so treatment and control arms have equal sizes.");
     clean[key] = value;
   }
   if (!Number.isInteger(body.baseRevision) || body.baseRevision < 0) throw new ApiError(400, "A valid base revision is required.");
@@ -145,7 +146,7 @@ export async function githubOverview(fetcher = fetch) {
     commits:(Array.isArray(data.commits)?data.commits:[]).map(c=>({sha:c.sha,message:c.commit?.message?.split("\n")[0],date:c.commit?.committer?.date,url:c.html_url,author:c.author?.login||c.commit?.author?.name})),
     branches:(Array.isArray(data.branches)?data.branches:[]).map(b=>({name:b.name,sha:b.commit?.sha,protected:b.protected})),
     issues:(Array.isArray(data.issues)?data.issues:[]).filter(i=>!i.pull_request).map(i=>({number:i.number,title:i.title,url:i.html_url,updatedAt:i.updated_at})),
-    workflows:(data.workflows?.workflow_runs||[]).map(w=>({id:w.id,name:w.name,status:w.status,conclusion:w.conclusion,sha:w.head_sha,branch:w.head_branch,createdAt:w.created_at,url:w.html_url})),
+    workflows:(data.workflows?.workflow_runs||[]).map(w=>({id:w.id,name:w.name,path:w.path,status:w.status,conclusion:w.conclusion,sha:w.head_sha,branch:w.head_branch,createdAt:w.created_at,url:w.html_url})),
   };
 }
 async function overview(request,env) {
